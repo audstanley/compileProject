@@ -1,11 +1,3 @@
-/*
-	Richard	Stanley
-	Alex
-	Kenny
-
-	This is the homework from week 02
-
-*/
 package main
 
 import (
@@ -46,7 +38,7 @@ func populateMapWithStringGroup(s string, l int) {
 
 	wordRegex := regexp.MustCompile(`[a-zA-Z]+|[0-9]+`)
 	digitRegex := regexp.MustCompile(`[0-9]+`)
-	operatorRegex := regexp.MustCompile(`[+-\\*\\/]`)
+
 	if wordRegex.MatchString(s) {
 		_, keyExists := mapOfVariables[s]
 		if !keyExists {
@@ -62,8 +54,6 @@ func populateMapWithStringGroup(s string, l int) {
 				mapOfVariables[s] = 0
 			}
 		}
-	} else if !operatorRegex.MatchString(s) {
-		panic(s + " is not in the grammer")
 	}
 
 }
@@ -102,9 +92,6 @@ func populateMapWithOneLongString(s string) {
 			panic("Please put a $ sign at the end of your expression...exiting")
 		}
 	}
-	for k, v := range mapOfVariables {
-		fmt.Println(k, v)
-	}
 	for _, v := range strSliced {
 		calculateWithALongerString(v)
 	}
@@ -125,14 +112,12 @@ func calculateWithALongerString(s string) {
 				x, _ := mapOfVariables[xStr]         // assign the value fot that variable for calculations
 				y, _ := mapOfVariables[yStr]         // assign the value fot that variable for calculations
 				calulationStack.Push(operatorToFunction(s, x, y))
-				fmt.Println(x, s, y)
 
 			} else if calulationStack.Len() == 1 {
 				x, _ := calulationStack.Pop().(int)  // assert that the variable is an int
 				yStr := variableStack.Pop().(string) // assert that the variable is a string
 				y, _ := mapOfVariables[yStr]         // assign the value fot that variable for calculations
 				calulationStack.Push(operatorToFunction(s, x, y))
-				fmt.Println(x, s, y)
 
 			} else if variableStack.Len() == 2 {
 				xStr := variableStack.Pop().(string) // assert that the variable is a string
@@ -140,14 +125,12 @@ func calculateWithALongerString(s string) {
 				x, _ := mapOfVariables[xStr]         // assign the value fot that variable for calculations
 				y, _ := mapOfVariables[yStr]         // assign the value fot that variable for calculations
 				calulationStack.Push(operatorToFunction(s, x, y))
-				fmt.Println(x, s, y)
 
 			} else {
 				x, _ := calulationStack.Pop().(int)  // assert that the variable is an int
 				yStr := variableStack.Pop().(string) // assert that the variable is a string
 				y, _ := mapOfVariables[yStr]         // assign the value fot that variable for calculations
 				calulationStack.Push(operatorToFunction(s, x, y))
-				fmt.Println(x, s, y)
 
 			}
 
@@ -155,7 +138,6 @@ func calculateWithALongerString(s string) {
 			x, _ := calulationStack.Pop().(int) // assert that the variable is an int
 			y, _ := calulationStack.Pop().(int) // assert that the variable is an int
 			calulationStack.Push(operatorToFunction(s, x, y))
-			fmt.Println(x, s, y)
 
 		}
 	}
