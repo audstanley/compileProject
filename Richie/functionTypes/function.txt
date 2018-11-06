@@ -1,0 +1,3 @@
+function someName(string s) {
+    
+}

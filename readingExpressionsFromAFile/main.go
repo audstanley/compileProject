@@ -1,8 +1,8 @@
 /*
-	Richard Stanley
-	Alex Truong
-	Kenny Chao
-	Row 5
+																																															Chao, Kenny
+																																															Stanley, Richard
+																																															Truong, Alex
+																																															Row 5
 */
 
 package main
@@ -39,7 +39,7 @@ func printMatchesOrMismatches(reg *regexp.Regexp, s string, location int, struct
 				}
 			}
 			// (FOR FUN) print in RED or GREEN with the ANSI/VT100 terminal color codes (this is linux/mac OS specific)
-			fmt.Print(cGreen, "✓   Match   ", cDefault, ":\t", s[subStringStart:subStringStop]) // print the submatch that is NOT empty
+			fmt.Print(cGreen, "✓   Match   ", cDefault, ":\t", s[subStringStart:subStringStop])
 		}
 	} else {
 		m := expressionNotInLanguage.FindStringSubmatch(s)
@@ -63,6 +63,40 @@ func printMatchesOrMismatches(reg *regexp.Regexp, s string, location int, struct
 	}
 	fmt.Println()
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 func main() {
 	fmt.Println("\nProject 3:")
