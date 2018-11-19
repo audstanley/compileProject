@@ -18,7 +18,7 @@ func validVariable(s string) bool {
 // we are returning int, int, int, string for error handling
 // int => errorCode, int => lineNumber, int => start of error, int => end of error, string => error statement
 func checkFormat(lines map[int][]string) (int, int, int, int, string) {
-
+	fmt.Println("CHECKING FORMAT")
 	//check for program declaration
 	if len(lines) >= 1 {
 
@@ -72,10 +72,65 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 		}
 	}
 
+	body := make(map[int][]string) // we are going to popluate just the body of the data (between begin and end)
+	var beginPosistion, endPosition = 0, len(lines)
+	for lNum, lArr := range lines {
+		if len(lArr) > 0 {
+			if lArr[0] == "begin" {
+				if beginPosistion == 0 {
+					beginPosistion = lNum
+				} else {
+					return 1, lNum, 0, 0, "You cannot have more than one begin statement."
+				}
+
+			} else if lArr[0] == "end" && lNum != len(lines) {
+				return 1, lNum, 0, 0, "Inproper end statement"
+
+			}
+		}
+		if beginPosistion != 0 && lNum > beginPosistion && lNum <= endPosition {
+			body[lNum] = lArr
+		}
+	}
+
+	fmt.Println("THE BODY OF THE SHIT IS: ", body)
+
+	// Youre gonna pass in the map of string arrays
+	// We're gonna parse the map of string arrays (slice) to see if it is a validated string format
+	// If it is validated, then turn the mapped string into an expression
+	// Move to next line
+
 	// check for end declaration
 	var lengthLines = len(lines)
 	if lines[lengthLines][0] != "end" {
-		return 1, lengthLines, 0, len(lines[lengthLines][0]) - 1, "No End Declaration"
+		return 1, lengthLines, 0, len(lines[lengthLines][0]) - 1, " No End Declaration"
+	}
+
+	//Validating left-hand variables of the body map
+	for lineNum, lineArr := range body {
+		var valVar string
+		valVar = body[lineNum][0]
+		if valVar != "show" && len(lineArr) >= 4 { //Every string that is not "show" will be checked if it has the right format
+			if validVariable(valVar) == true {
+				if body[lineNum][1] == "=" {
+					return 0, lineNum, 0, 0, " Valid lefthand syntax"
+				} else {
+					return 1, lineNum, 0, 0, " Invalid lefthand syntax+"
+				}
+			} else {
+				if validVariable(valVar) != true {
+					return 1, lineNum, 0, 0, " Invalid variable"
+				}
+			}
+		} else if valVar == "show" {
+			if body[lineNum][1] != "(" && body[lineNum][len(lineArr)-2] == ")" && body[lineNum][len(lineArr)-1] == ";" {
+				//if content inside is an integer or an existing variable then accept
+			} else {
+				return 1, lineNum, 0, 0, " Invalid id inside 'show'"
+			}
+		} else {
+			return 1, lineNum, 0, 0, "blah"
+		}
 	}
 
 	return 0, 0, 0, 0, ""

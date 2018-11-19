@@ -9,9 +9,9 @@ import (
 func main() {
 
 	// Read from file and sanitize the string:
-	fmt.Println("2Starting ...")
+	fmt.Println("Starting ...")
 	data, err := ioutil.ReadFile("./originalCode.txt")
-	if err != nil {
+	if err != nil { // Error exists (Alex)
 		panic("Could not read originalCode.xt")
 	}
 	dataString := string(data)
