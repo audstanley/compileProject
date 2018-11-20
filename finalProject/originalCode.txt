@@ -8,7 +8,7 @@ begin
 	ab1        = 3 ; // initialize variables
 	cd =      4 ;
 	 e33a      = 5    ;
-show ( ab1    ); // display ab1
+show ( ab1    ) ; // display ab1
 
 	/*
 	 blah blah
@@ -16,6 +16,6 @@ show ( ab1    ); // display ab1
 //
 
 
-	d18 = ab1 *    ( cd + 2 *       e33a)     ;
+	d18 = ab1 *    ( cd + 2 *       e33a )     ;
 	show (        d18   ) ;
 end

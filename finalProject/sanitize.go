@@ -8,9 +8,9 @@ func sanitize(theString *string) {
 
 	//r0 := regexp.MustCompile(`([^;]+;)([\W\S]+)`)
 	r0 := regexp.MustCompile(`[\s]*([\W\S]+)`)
-	r1 := regexp.MustCompile(`\/\*([^*]*)\*\/|//([^\n]*)`)
+	r1 := regexp.MustCompile(`[\s]?\/\*([^*]*)\*\/|[\s]?//([^\n]*)`)
 	r2 := regexp.MustCompile(` ([ ]+)`)
-	twoOrMoreNewLines := regexp.MustCompile(`(\n[ \t\n\s]*)`)
+	twoOrMoreNewLines := regexp.MustCompile(`([\s]?\n[\t\n\s]*)`)
 
 	o0 := r0.FindStringSubmatch(*theString)
 	o1 := r1.ReplaceAllString((o0[1]), "")
