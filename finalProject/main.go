@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+	"time"
 )
 
 func main() {
+
+	startTime := time.Now()
 
 	// Read from file and sanitize the string:
 	fmt.Println("Starting ...")
@@ -46,4 +49,7 @@ func main() {
 	} else {
 		fmt.Println("Everything is good")
 	}
+
+	fmt.Println("FinalProject ran in: ", time.Since(startTime).Seconds())
+
 }

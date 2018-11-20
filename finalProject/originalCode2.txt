@@ -5,7 +5,7 @@ var
 	// declare variables
 ab1 , cd , e33a , d18 : integer ;
 begin
-	ab1        = 3; // initialize variables
+	ab1        = 3 ; // initialize variables
 	cd =      4 ;
 	 e33a      = 5    ;
 show ( ab1    ) ; // display ab1
@@ -17,5 +17,5 @@ show ( ab1    ) ; // display ab1
 
 
 	d18 = ab1 *    ( cd + 2 *       e33a )     ;
-	show (        d18   );
+	show (        d18   ) ;
 end
