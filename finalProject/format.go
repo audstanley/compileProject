@@ -183,7 +183,7 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 						if eCode != -1 {                                 // check if there is NO error from mathrhs
 							return 1, lineNum, eCode, eCode + 1, eStr
 						} else {
-							// the expression is good
+							// the expression is goodbeginPosistion
 							ourOutput[lineNum-1] = "\t"
 							for i, k := range lineArr {
 								fmt.Println(cYellow, lineArr, cBlue, " : ", i)
