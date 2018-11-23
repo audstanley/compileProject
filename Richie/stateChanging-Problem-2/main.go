@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/golang-collections/collections/stack"
 )
@@ -76,6 +77,9 @@ func reject(i int, dat []byte) {
 }
 
 func main() {
+
+	timeStart := time.Now()
+
 	// a   +   -   *   /   (    )   $  =    b
 	var matrix = [][]int{
 		{10, -1, -1, -1, -1, 10, -1, -1, 10, 10},     // E
@@ -319,6 +323,7 @@ func main() {
 done:
 	if stackOfBytes.Len() == 0 {
 		fmt.Println(cGreen, "This was a valid Expression", cDefault)
+		fmt.Println("Time it took to run: ", time.Since(timeStart).Seconds())
 	} else {
 		//fmt.Println(cRed, "NOT A VALID EXPRESSION", cDefault)
 		reject(finalLocation, dat)
