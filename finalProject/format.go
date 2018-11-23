@@ -3,15 +3,34 @@ package main
 import (
 	"fmt"
 	"regexp"
+	"strings"
 )
 
 var ourVariables []string
 
 func validVariable(s string) bool {
-	r1, err := regexp.Match(`[a-zA-Z][a-zA-Z0-9]*`, []byte(s))
-	if err != nil {
-		panic("vailidateVariable regex match failed: ")
-	}
+	r1, _ := regexp.Match(`^[a-zA-Z][a-zA-Z0-9]*$`, []byte(s))
+	return r1
+}
+
+func showTest(s string) []string {
+	r1 := regexp.MustCompile(`show\s?\(\s?(\w+)\s?\)\s?(;)?`)
+	match := r1.FindStringSubmatch(s)
+	return match
+}
+
+func mightBeTheWordInteger(s string) bool {
+	// the word needs to at least start with int, otherwise we spellcheck,
+	// and throw an error.
+	r1, _ := regexp.Match(`[i][n][t][aeiouwsdr43]?[gftyhbv]?[aeiouwsdr43]?[redft54]?`, []byte(s))
+	return r1
+}
+
+func mightBeTheWordShow(s string) bool {
+	// if the first word starts with an s,
+	// and the last two characters are any keypad letter near where they should be
+	// throw this spelling error
+	r1, _ := regexp.Match(`[s][hgtyujnb][aeiouiklp09][qase321]?`, []byte(s))
 	return r1
 }
 
@@ -24,15 +43,15 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 	if len(lines) >= 1 {
 
 		if len(lines[1]) > 0 && lines[1][0] != "program" {
-			return 1, 1, 0, len(lines[1]) - 1, "No Program Declaration"
+			return 1, 1, 0, len(lines[1]) - 1, " No Program Declaration"
 		}
 
 		if len(lines[1]) > 1 && !validVariable(lines[1][1]) {
-			return 1, 1, 0, len(lines[1]) - 1, "Program Declaration Variable Not Valid"
+			return 1, 1, 0, len(lines[1]) - 1, " Program Declaration Variable Not Valid"
 		}
 
 		if len(lines[1]) > 2 && lines[1][2] != ";" {
-			return 1, 2, 0, 1, "Missing semicolon"
+			return 1, 2, 0, 1, " Missing semicolon"
 		}
 
 	}
@@ -41,35 +60,46 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 	if len(lines) >= 2 {
 		if len(lines[2]) > 0 {
 			if lines[2][0] != "var" {
-				return 1, 2, 0, len(lines[2]) - 1, "No Variable Declaration"
+				return 1, 2, 0, len(lines[2]) - 1, " No Variable Declaration"
 			}
 		}
 	}
 
 	if len(lines) >= 3 {
 		for i, word := range lines[3] {
-			fmt.Println("CHECKING: ", word, " at location: ", i)
-			if i%2 == 0 {
+			if i%2 == 0 { //
 				if !validVariable(word) && i < len(lines[3])-3 {
 					// fix math for the fucked up substring area
-					return 1, 3, len(lines[3][i]), len(lines[3][i]), " Not a valid variable"
+					return 1, 3, i, i + 1, " Not a valid variable"
 				} else if validVariable(word) && i < len(lines[3])-3 {
 					ourVariables = append(ourVariables, word)
-				} else if i == len(lines[3])-2 && word != "integer" {
-					return 1, 3, len(lines[3][i]), len(lines[3][i]), " Must declare integer type"
+				} else if i == len(lines[3])-2 && !mightBeTheWordInteger(word) && word != "integer" {
+					return 1, 3, i, i + 1, " Must declare integer type, might be a misspelling"
+				} else if i == len(lines[3])-2 && mightBeTheWordInteger(word) && word != "integer" {
+					return 1, 3, i, i + 1, " the word integer is mispelled"
+				} else if i == len(lines[3])-2 && word == "integer" {
+					continue
+				} else {
+					return 1, 3, i + 1, len(lines[3]), "improper format in variable decliration"
 				}
 
-			} else {
-				fmt.Println("     math:", len(lines[3])-3)
+			} else if i%2 == 1 {
 				if word != "," && i < len(lines[3])-3 {
 					// fix math for the fucked up substring area
-					return 1, 3, len(lines[3][i]), len(lines[3][i]), " missing a comma"
+					return 1, 3, i, i + 1, " missing a comma"
+				} else if i == len(lines[3])-1 {
+					fmt.Println("pooooop2")
+					continue
 				} else if i == len(lines[3])-3 && word != ":" {
-					return 1, 3, len(lines[3][i]), len(lines[3][i]),
-						" Your variable declaration is missing a data type delimiter"
+					return 1, 3, i, i + 1, " Your variable declaration is missing a data type delimiter"
 				}
 			}
 		}
+	}
+
+	fmt.Println(cGreen, "ourVariables: ", ourVariables, cDefault)
+	if len(lines) >= 4 && lines[4][0] != "begin" {
+		return 1, 4, 0, 1, " You need to have a begin statement before defining variables"
 	}
 
 	// populate the body of the code to be checked for mathematical expressions, or for functions (such as the show func):
@@ -81,24 +111,24 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 				if beginPosistion == 0 {
 					beginPosistion = lNum
 				} else {
-					return 1, lNum, 0, 0, "You cannot have more than one begin statement."
+					return 1, lNum, 0, 0, " You cannot have more than one begin statement."
 				}
 			} else if lArr[0] == "end" && lNum != len(lines) {
-				return 1, lNum, 0, 0, "Inproper end statement"
+				return 1, lNum, 0, 0, " End statement needs to be at the end of the document"
 			}
 		}
 	}
-	if beginPosistion == -1 {
-		return 1, len(lines), 0, 0, "You are missing a begin statement"
+	if beginPosistion == 0 {
+		return 1, len(lines), 0, 0, " You are missing a begin statement in your document"
 	} else if lines[len(lines)][0] != "end" {
-		return 1, len(lines), 0, 0, "You are missing an end statement"
+		return 1, len(lines), 0, 0, " You are missing an end statement at the end of your document"
 	}
 	for i, k := range lines {
 		if i < endPosition && i > beginPosistion {
 			body[i] = k
 		}
 	}
-
+	fmt.Print(cGreen, "THE BEGINPOSITION IS: ", beginPosistion, cDefault)
 	fmt.Println("THE BODY OF THE SHIT IS: ", body)
 
 	// Youre gonna pass in the map of string arrays
@@ -118,38 +148,45 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 			var valVar string
 			valVar = body[lineNum][0]
 			if valVar != "show" && len(lineArr) >= 4 { //Every string that is not "show" will be checked if it has the right format
+				if mightBeTheWordShow(valVar) {
+					return 1, lineNum, 0, 1, "Incorred spelling"
+				}
 				if validVariable(valVar) {
 					fmt.Println("VALIDATE A MATH ESPRESSION")
 					if body[lineNum][1] == "=" {
 						// Here is where we will parse through the (call the function Alex was working on)
 						eCode, eStr := validateDefinition(body[lineNum]) // function defined in validateDefinition.go
 						if eCode != -1 {
-							return 1, lineNum, 0, 0, eStr
+							return 1, lineNum, eCode, eCode + 1, eStr
 						}
 					} else {
 						return 1, lineNum, 0, 0, " Invalid lefthand syntax+"
 					}
 				} else {
 					if validVariable(valVar) != true {
-						return 1, lineNum, 0, 0, " Invalid variable"
+						return 1, lineNum, 0, 0, " Invalid expression"
 					}
 				}
 			} else if valVar == "show" {
-				if body[lineNum][1] == "(" && body[lineNum][len(lineArr)-2] == ")" && body[lineNum][len(lineArr)-1] == ";" {
-					// if content inside is an integer or an existing variable then accept
-					// we can append content to the goOutputStruct
-					fmt.Println("The show function is Golden")
-
+				showArr := showTest(strings.Join(body[lineNum], " "))
+				fmt.Println(cGreen, showArr, cDefault)
+				if len(showArr) == 3 {
+					// for loop to check the var
+					if !variableHasBeenDeclared(showArr[1]) {
+						// return error return lineNum, start = 2, end = 3
+						return 1, lineNum, 2, 3, " Variable not declared"
+					}
+					if showArr[2] != ";" {
+						return 1, lineNum, 4, 5, " Missing semicolon or invalid element"
+					}
 				} else {
-					fmt.Println("ERROR: ", body[lineNum])
-					return 1, lineNum, 0, 0, " Invalid id inside 'show'"
+					fmt.Println(body[lineNum])
+					return 1, lineNum, 0, 0, " The show function is improperly formatted"
 				}
 			} else {
-				fmt.Println(body[lineNum])
-				return 1, lineNum, 0, 0, "The show function is improperly formatted"
+				return 1, lineNum, 0, 0, " Illegal expression"
 			}
 		}
 	}
-
 	return 0, 0, 0, 0, ""
 }

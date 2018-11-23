@@ -3,19 +3,61 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"sort"
 	"strings"
 	"time"
 )
 
-func main() {
+const cRed = "\033[31m"
+const cBlue = "\033[96m"
+const cGreen = "\033[1;32m"
+const cYellow = "\033[33m"
+const cMagenta = "\033[35m"
+const cDefault = "\033[0m"
 
+func consolePrintErrorSubString(lines map[int][]string, lErr int, ssBegin int, ssEnd int, eStr string) {
+	fmt.Println(cRed, "ERROR on Line ", lErr, ": ", eStr, cDefault)
+	fmt.Print("SS:", cYellow, ssBegin, " ", ssEnd, cDefault)
+	var keys []int
+	for k := range lines {
+		keys = append(keys, k)
+	}
+	sort.Ints(keys)
+	for _, i := range keys {
+		if lErr == i {
+			for j, k := range lines[i] {
+				if j == 0 {
+					fmt.Print("\t")
+				}
+				if j >= ssBegin && j < ssEnd {
+					fmt.Print(cBlue, k, " ", cDefault)
+				} else if ssEnd == ssBegin {
+					fmt.Print(cRed, k, " ", cDefault)
+				} else {
+					fmt.Print(cRed, k, " ", cDefault)
+				}
+			}
+			fmt.Println()
+		} else {
+			for j, k := range lines[i] {
+				if j == 0 {
+					fmt.Print("\t")
+				}
+				fmt.Print(k, " ")
+			}
+			fmt.Println()
+		}
+	}
+}
+
+func main() {
 	startTime := time.Now()
 
 	// Read from file and sanitize the string:
 	fmt.Println("Starting ...")
-	data, err := ioutil.ReadFile("./originalCode.txt")
-	if err != nil { // Error exists (Alex)
-		panic("Could not read originalCode.xt")
+	data, err := ioutil.ReadFile("./originalCode2.txt")
+	if err != nil { // Error ioutilexists (Alex)
+		panic("Could not read originalCode.txt")
 	}
 	dataString := string(data)
 	sanitize(&dataString) // function that will remove comments, as well as extra spaces
@@ -44,10 +86,11 @@ func main() {
 	}
 
 	if errorCode == 1 {
-		// handle all the error stuff LATER!!!
-		fmt.Print("Some fucking error: ", lineErr, ssBegin, ssEnd, errorStr)
+		consolePrintErrorSubString(lines, lineErr, ssBegin, ssEnd, errorStr)
+		//fmt.Print("Error on line: ", lineErr, ssBegin, ssEnd, errorStr, "\n", cDefault)
 	} else {
 		fmt.Println("Everything is good")
+		otherMethod(dataString)
 	}
 
 	fmt.Println("FinalProject ran in: ", time.Since(startTime).Seconds())

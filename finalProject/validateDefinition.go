@@ -45,10 +45,14 @@ func variableHasBeenDeclared(s string) bool {
 }
 
 func validateDefinition(toBeValidated []string) (int, string) {
-	// -1 to accept
+	// toBeValidated is a string array of an individual line that is in a defined style format
+	// return -1 to accept
 	// anything else is location of error
+	var passToMathChecker []string
 
-	passToMathChecker := toBeValidated
+	for _, k := range toBeValidated {
+		passToMathChecker = append(passToMathChecker, k)
+	}
 
 	for i, v := range toBeValidated {
 		fmt.Println("toBeValidated length: ", len(toBeValidated), " value: ", toBeValidated)
@@ -76,7 +80,11 @@ func validateDefinition(toBeValidated []string) (int, string) {
 			}
 		}
 	}
-	mathrhs(strings.Join(passToMathChecker, ""))
+	mathCode := mathrhs(strings.Join(passToMathChecker, ""))
+	if mathCode == -1 {
+		return -1, ""
+	} else {
+		return mathCode, "Invalid Mathematical Expression"
+	}
 
-	return -1, ""
 }

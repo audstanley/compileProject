@@ -1,21 +1,11 @@
 program a2018 ;
-	/* This comment
-		is stupid */
 var
-	// declare variables
-ab1 , cd , e33a , d18 : integer ;
+j , cd , e33a , d18 : integer ;
 begin
-	ab1        = 3 ; // initialize variables
-	cd =      4 ;
-	 e33a      = 5    ;
-show ( ab1    ) ; // display ab1
-
-	/*
-	 blah blah
-	*/
-//
-
-
-	d18 = ab1 *    ( cd + 2 *       e33a )     ;
-	show (        d18   ) ;
+j = 3 ;
+cd = 4 + 5 + 6 + 7 ;
+e33a = 5    ;
+show ( j ) ;
+d18 = j * ( cd + 2 * e33a ) ;
+show ( d18 ) ;
 end

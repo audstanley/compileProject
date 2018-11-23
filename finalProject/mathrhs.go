@@ -2,16 +2,10 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/golang-collections/collections/stack"
 )
-
-const cRed = "\033[31m"
-const cGreen = "\033[1;32m"
-const cYellow = "\033[33m"
-const cDefault = "\033[0m"
 
 func asciiCode(k byte) int {
 	return int([]rune(string(k))[0])
@@ -65,10 +59,10 @@ func reject(i int, dat []byte) {
 	fmt.Println()
 	fmt.Println(cRed, "-----------------------------------------------------", cDefault)
 	fmt.Println()
-	os.Exit(1)
+	//os.Exit(1)
 }
 
-func mathrhs(expression string) {
+func mathrhs(expression string) int {
 	// a   +   -   *   /   (    )   ;  =    b
 	var matrix = [][]int{
 		{10, -1, -1, -1, -1, 10, -1, -1, 10, 10},     // E
@@ -116,18 +110,21 @@ func mathrhs(expression string) {
 			stateNum = matrix[0][getColumn(asciiCode(k))]
 			if stateNum == -1 {
 				reject(i, dat)
+				return i
 			}
 			goto skipIteration
 		case 1: // State Q
 			stateNum = matrix[1][getColumn(asciiCode(k))]
 			if stateNum == -1 {
 				reject(i, dat)
+				return i
 			}
 			goto skipIteration
 		case 2: // State T
 			stateNum = matrix[2][getColumn(asciiCode(k))]
 			if stateNum == -1 {
 				reject(i, dat)
+				return i
 			}
 			goto skipIteration
 		case 3: // State R
@@ -135,6 +132,7 @@ func mathrhs(expression string) {
 			stateNum = matrix[3][getColumn(asciiCode(k))]
 			if stateNum == -1 {
 				reject(i, dat)
+				return i
 			}
 			goto skipIteration
 		case 4: // State F
@@ -142,6 +140,7 @@ func mathrhs(expression string) {
 			stateNum = matrix[4][getColumn(asciiCode(k))]
 			if stateNum == -1 {
 				reject(i, dat)
+				return i
 			}
 			goto skipIteration
 		case 5: // State S
@@ -149,51 +148,60 @@ func mathrhs(expression string) {
 			stateNum = matrix[5][getColumn(asciiCode(k))]
 			if stateNum == -1 {
 				reject(i, dat)
+				return i
 			}
 			goto skipIteration
 		case 'a': // StateNumber: 97
 			if k != 97 {
 				reject(i, dat)
+				return i
 			}
 			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case 'b': // StateNumber: 98
 			if k != 98 {
 				reject(i, dat)
+				return i
 			}
 			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case '+': // StateNumber: 43
 			if k != 43 {
 				reject(i, dat)
+				return i
 			}
 			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case '-': // StateNumber: 45
 			if k != 45 {
-				reject(i, dat)
+				return i
 			}
 			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case '*': // StateNumber: 42
 			if k != 42 {
 				reject(i, dat)
+				return i
 			}
 			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case '/': // StateNumber: 47
 			if k != 47 {
 				reject(i, dat)
+				return i
 			}
 			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case '(': // StateNumber: 40
 			if k != 40 {
 				reject(i, dat)
+				return i
 			}
 			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case ')': // StateNumber: 41
 			if k != 41 {
 				reject(i, dat)
+				return i
 			}
 			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case '=': // StateNumber: 61
 			if k != 61 {
 				reject(i, dat)
+				return i
 			}
 			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case ';': // StateNumber: 59 (lambda)
@@ -208,6 +216,7 @@ func mathrhs(expression string) {
 					goto done
 				} else if stackOfBytes.Len() == 0 && k != 59 {
 					reject(i, dat)
+					return i
 
 				} else {
 					//fmt.Println("\t\tNO MATCH    k:", string(k), "stateNum: ", stateNum)
@@ -311,9 +320,11 @@ func mathrhs(expression string) {
 done:
 	if stackOfBytes.Len() == 0 {
 		fmt.Println(cGreen, "This was a valid Expression", cDefault)
+		return -1
 	} else {
 		//fmt.Println(cRed, "NOT A VALID EXPRESSION", cDefault)
 		reject(finalLocation, dat)
+		return finalLocation
 	}
 
 }
