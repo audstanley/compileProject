@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"os/exec"
 	"sort"
 	"strings"
 	"time"
@@ -55,7 +56,7 @@ func main() {
 
 	// Read from file and sanitize the string:
 	fmt.Println("Starting ...")
-	data, err := ioutil.ReadFile("./originalCode2.txt")
+	data, err := ioutil.ReadFile("./originalCode.txt")
 	if err != nil { // Error ioutilexists (Alex)
 		panic("Could not read originalCode.txt")
 	}
@@ -90,7 +91,20 @@ func main() {
 		//fmt.Print("Error on line: ", lineErr, ssBegin, ssEnd, errorStr, "\n", cDefault)
 	} else {
 		fmt.Println("Everything is good")
-		otherMethod(dataString)
+		for i, k := range ourOutput {
+			fmt.Print(cBlue, "LINE: ", i, cMagenta, k, cDefault, "\n")
+		}
+		ioutil.WriteFile("./output/main.go", []byte(strings.Join(ourOutput, "\n")), 0644)
+		// once we write to a file, we can compile using
+		// a local shell script that will use the go compiler to
+		// output binaries for multiple operating systems
+		cmd := exec.Command("./go-executable-build.sh", "main.go")
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			fmt.Println(cRed, err, cDefault)
+		} else {
+			fmt.Println(string(out))
+		}
 	}
 
 	fmt.Println("FinalProject ran in: ", time.Since(startTime).Seconds())

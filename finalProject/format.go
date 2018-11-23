@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 )
 
 var ourVariables []string
+var ourOutput []string
 
 func validVariable(s string) bool {
 	r1, _ := regexp.Match(`^[a-zA-Z][a-zA-Z0-9]*$`, []byte(s))
@@ -65,6 +67,7 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 		}
 	}
 
+	// run through each variable declaration, and
 	if len(lines) >= 3 {
 		for i, word := range lines[3] {
 			if i%2 == 0 { //
@@ -104,12 +107,12 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 
 	// populate the body of the code to be checked for mathematical expressions, or for functions (such as the show func):
 	body := make(map[int][]string) // we are going to popluate just the body of the data (between begin and end)
-	var beginPosistion, endPosition = 0, len(lines)
+	var beginPosition, endPosition = 0, len(lines)
 	for lNum, lArr := range lines {
 		if len(lArr) > 0 {
 			if lArr[0] == "begin" {
-				if beginPosistion == 0 {
-					beginPosistion = lNum
+				if beginPosition == 0 {
+					beginPosition = lNum
 				} else {
 					return 1, lNum, 0, 0, " You cannot have more than one begin statement."
 				}
@@ -118,19 +121,40 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 			}
 		}
 	}
-	if beginPosistion == 0 {
+	if beginPosition == 0 {
 		return 1, len(lines), 0, 0, " You are missing a begin statement in your document"
 	} else if lines[len(lines)][0] != "end" {
 		return 1, len(lines), 0, 0, " You are missing an end statement at the end of your document"
 	}
 	for i, k := range lines {
-		if i < endPosition && i > beginPosistion {
+		if i < endPosition && i > beginPosition {
 			body[i] = k
 		}
 	}
-	fmt.Print(cGreen, "THE BEGINPOSITION IS: ", beginPosistion, cDefault)
+	fmt.Print(cGreen, "THE BEGINPOSITION IS: ", beginPosition, cDefault)
 	fmt.Println("THE BODY OF THE SHIT IS: ", body)
 
+	// populate the main.go file, and verify the body of the function below
+	var keys []int
+	for k := range lines {
+		keys = append(keys, k)
+		ourOutput = append(ourOutput, "")
+	}
+	sort.Ints(keys)
+
+	ourOutput[0] = "package main"
+	ourOutput[1] = "import (\"fmt\")"
+	ourOutput[2] = "var "
+	for i, k := range ourVariables {
+		if i != len(ourVariables)-1 {
+			ourOutput[2] += k + ", "
+		} else {
+			ourOutput[2] += k + " "
+		}
+	}
+	ourOutput[2] += "int"
+	ourOutput[3] = "func main() {"
+	ourOutput[len(ourOutput)-1] = "}"
 	// Youre gonna pass in the map of string arrays
 	// We're gonna parse the map of string arrays (slice) to see if it is a validated string format
 	// If it is validated, then turn the mapped string into an expression
@@ -144,20 +168,32 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 
 	//Validating left-hand variables of the body map
 	for lineNum, lineArr := range body {
-		if lineNum > beginPosistion && lineNum < endPosition {
+		if lineNum > beginPosition && lineNum < endPosition {
 			var valVar string
 			valVar = body[lineNum][0]
 			if valVar != "show" && len(lineArr) >= 4 { //Every string that is not "show" will be checked if it has the right format
 				if mightBeTheWordShow(valVar) {
-					return 1, lineNum, 0, 1, "Incorred spelling"
+					return 1, lineNum, 0, 1, "Incorrect spelling"
 				}
 				if validVariable(valVar) {
 					fmt.Println("VALIDATE A MATH ESPRESSION")
 					if body[lineNum][1] == "=" {
 						// Here is where we will parse through the (call the function Alex was working on)
 						eCode, eStr := validateDefinition(body[lineNum]) // function defined in validateDefinition.go
-						if eCode != -1 {
+						if eCode != -1 {                                 // check if there is NO error from mathrhs
 							return 1, lineNum, eCode, eCode + 1, eStr
+						} else {
+							// the expression is good
+							ourOutput[lineNum-1] = "\t"
+							for i, k := range lineArr {
+								fmt.Println(cYellow, lineArr, cBlue, " : ", i)
+								if i == len(lineArr)-1 {
+									ourOutput[lineNum-1] += "" // replace the semicolon with a newline character
+								} else {
+									ourOutput[lineNum-1] += k + " "
+								}
+							}
+
 						}
 					} else {
 						return 1, lineNum, 0, 0, " Invalid lefthand syntax+"
@@ -178,7 +214,11 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 					}
 					if showArr[2] != ";" {
 						return 1, lineNum, 4, 5, " Missing semicolon or invalid element"
+					} else {
+						// the show function is good:
+						ourOutput[lineNum-1] = "\tfmt.Println(" + showArr[1] + ")"
 					}
+
 				} else {
 					fmt.Println(body[lineNum])
 					return 1, lineNum, 0, 0, " The show function is improperly formatted"
@@ -188,5 +228,6 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 			}
 		}
 	}
+
 	return 0, 0, 0, 0, ""
 }
