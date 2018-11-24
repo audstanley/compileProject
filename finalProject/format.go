@@ -187,9 +187,7 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 							linePopulated := []byte("\t")
 							for i, k := range lineArr {
 								fmt.Println(cYellow, lineArr, cBlue, " : ", i)
-								if i == len(lineArr)-1 {
-									linePopulated = append(linePopulated, []byte(k)...)
-								} else {
+								if i != len(lineArr)-1 {
 									linePopulated = append(linePopulated, []byte(k+" ")...)
 								}
 							}
