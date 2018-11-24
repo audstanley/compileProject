@@ -32,7 +32,7 @@ func mightBeTheWordShow(s string) bool {
 	// if the first word starts with an s,
 	// and the last two characters are any keypad letter near where they should be
 	// throw this spelling error
-	r1, _ := regexp.Match(`[s][hgtyujnb][aeiouiklp09][qase321]?`, []byte(s))
+	r1, _ := regexp.Match(`[s][hgtyujnb]?[aeiouiklp09]?[wqase321]?`, []byte(s))
 	return r1
 }
 
@@ -83,7 +83,7 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 				} else if i == len(lines[3])-2 && word == "integer" {
 					continue
 				} else {
-					return 1, 3, i + 1, len(lines[3]), "improper format in variable decliration"
+					return 1, 3, i + 1, len(lines[3]), "improper format in variable declaration"
 				}
 
 			} else if i%2 == 1 {
@@ -91,7 +91,6 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 					// fix math for the fucked up substring area
 					return 1, 3, i, i + 1, " missing a comma"
 				} else if i == len(lines[3])-1 {
-					fmt.Println("pooooop2")
 					continue
 				} else if i == len(lines[3])-3 && word != ":" {
 					return 1, 3, i, i + 1, " Your variable declaration is missing a data type delimiter"
@@ -106,7 +105,7 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 	}
 
 	// populate the body of the code to be checked for mathematical expressions, or for functions (such as the show func):
-	body := make(map[int][]string) // we are going to popluate just the body of the data (between begin and end)
+	body := make(map[int][]string) // we are going to populate just the body of the data (between begin and end)
 	var beginPosition, endPosition = 0, len(lines)
 	for lNum, lArr := range lines {
 		if len(lArr) > 0 {
@@ -141,21 +140,22 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 		ourOutput = append(ourOutput, "")
 	}
 	sort.Ints(keys)
-
 	ourOutput[0] = "package main"
 	ourOutput[1] = "import (\"fmt\")"
-	ourOutput[2] = "var "
+	// we should use a byte array to be o(1) efficient when appending
+	variableDeclaration := []byte("var ")
 	for i, k := range ourVariables {
 		if i != len(ourVariables)-1 {
-			ourOutput[2] += k + ", "
+			variableDeclaration = append(variableDeclaration, []byte(k+", ")...)
 		} else {
-			ourOutput[2] += k + " "
+			variableDeclaration = append(variableDeclaration, []byte(k+" ")...)
 		}
 	}
-	ourOutput[2] += "int"
+	variableDeclaration = append(variableDeclaration, []byte("int")...)
+	ourOutput[2] += string(variableDeclaration)
 	ourOutput[3] = "func main() {"
 	ourOutput[len(ourOutput)-1] = "}"
-	// Youre gonna pass in the map of string arrays
+	// You're gonna pass in the map of string arrays
 	// We're gonna parse the map of string arrays (slice) to see if it is a validated string format
 	// If it is validated, then turn the mapped string into an expression
 	// Move to next line
@@ -173,27 +173,27 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 			valVar = body[lineNum][0]
 			if valVar != "show" && len(lineArr) >= 4 { //Every string that is not "show" will be checked if it has the right format
 				if mightBeTheWordShow(valVar) {
-					return 1, lineNum, 0, 1, "Incorrect spelling"
+					return 1, lineNum, 0, 1, "Incorrect spelling of the word 'show'"
 				}
 				if validVariable(valVar) {
-					fmt.Println("VALIDATE A MATH ESPRESSION")
+					fmt.Println("VALIDATE A MATH EXPRESSION")
 					if body[lineNum][1] == "=" {
 						// Here is where we will parse through the (call the function Alex was working on)
 						eCode, eStr := validateDefinition(body[lineNum]) // function defined in validateDefinition.go
 						if eCode != -1 {                                 // check if there is NO error from mathrhs
 							return 1, lineNum, eCode, eCode + 1, eStr
 						} else {
-							// the expression is goodbeginPosistion
-							ourOutput[lineNum-1] = "\t"
+							// the expression is goodbeginPosition
+							linePopulated := []byte("\t")
 							for i, k := range lineArr {
 								fmt.Println(cYellow, lineArr, cBlue, " : ", i)
 								if i == len(lineArr)-1 {
-									ourOutput[lineNum-1] += "" // replace the semicolon with a newline character
+									linePopulated = append(linePopulated, []byte(k)...)
 								} else {
-									ourOutput[lineNum-1] += k + " "
+									linePopulated = append(linePopulated, []byte(k+" ")...)
 								}
 							}
-
+							ourOutput[lineNum-1] = string(linePopulated)
 						}
 					} else {
 						return 1, lineNum, 0, 0, " Invalid lefthand syntax+"
@@ -228,6 +228,5 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 			}
 		}
 	}
-
 	return 0, 0, 0, 0, ""
 }

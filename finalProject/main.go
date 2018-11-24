@@ -55,7 +55,6 @@ func main() {
 	startTime := time.Now()
 
 	// Read from file and sanitize the string:
-	fmt.Println("Starting ...")
 	data, err := ioutil.ReadFile("./originalCode.txt")
 	if err != nil { // Error ioutilexists (Alex)
 		panic("Could not read originalCode.txt")
@@ -94,6 +93,7 @@ func main() {
 		for i, k := range ourOutput {
 			fmt.Print(cBlue, "LINE: ", i, cMagenta, k, cDefault, "\n")
 		}
+		fmt.Println("FinalProject ran in: ", time.Since(startTime).Seconds())
 		ioutil.WriteFile("./output/main.go", []byte(strings.Join(ourOutput, "\n")), 0644)
 		// once we write to a file, we can compile using
 		// a local shell script that will use the go compiler to
@@ -106,7 +106,4 @@ func main() {
 			fmt.Println(string(out))
 		}
 	}
-
-	fmt.Println("FinalProject ran in: ", time.Since(startTime).Seconds())
-
 }
