@@ -52,17 +52,19 @@ func consolePrintErrorSubString(lines map[int][]string, lErr int, ssBegin int, s
 }
 
 func main() {
-	startTime := time.Now()
-
 	// Read from file and sanitize the string:
+	readFileTime := time.Now()
 	data, err := ioutil.ReadFile("./originalCode.txt")
 	if err != nil { // Error ioutilexists (Alex)
 		panic("Could not read originalCode.txt")
 	}
+	afterReadFileTime := time.Since(readFileTime).Nanoseconds()
+
 	dataString := string(data)
 	sanitize(&dataString) // function that will remove comments, as well as extra spaces
 	dataStringSlice := strings.Split(dataString, "\n")
 	fmt.Println(dataString)
+	startTime := time.Now()
 
 	lines := make(map[int][]string)
 	for i, k := range dataStringSlice {
@@ -87,23 +89,23 @@ func main() {
 
 	if errorCode == 1 {
 		consolePrintErrorSubString(lines, lineErr, ssBegin, ssEnd, errorStr)
-		//fmt.Print("Error on line: ", lineErr, ssBegin, ssEnd, errorStr, "\n", cDefault)
 	} else {
 		fmt.Println("Everything is good")
 		for i, k := range ourOutput {
 			fmt.Print(cBlue, "LINE: ", i, cMagenta, k, cDefault, "\n")
 		}
-		fmt.Println("FinalProject ran in: ", time.Since(startTime).Seconds())
+		fmt.Println("Reading from file ran in: ", afterReadFileTime/1000, "\tmicroseconds")
+		fmt.Println("ProjectTranspiling ran in:", time.Since(startTime).Nanoseconds()/1000000, "\tmilliseconds")
+		writeAndCompileTime := time.Now()
 		ioutil.WriteFile("./output/main.go", []byte(strings.Join(ourOutput, "\n")), 0644)
 		// once we write to a file, we can compile using
 		// a local shell script that will use the go compiler to
 		// output binaries for multiple operating systems
 		cmd := exec.Command("./go-executable-build.sh", "main.go")
-		out, err := cmd.CombinedOutput()
+		_, err := cmd.CombinedOutput()
 		if err != nil {
 			fmt.Println(cRed, err, cDefault)
-		} else {
-			fmt.Println(string(out))
 		}
+		fmt.Println("CompiledToBinary ran in:  ", time.Since(writeAndCompileTime).Nanoseconds()/1000000, "\tmilliseconds")
 	}
 }
