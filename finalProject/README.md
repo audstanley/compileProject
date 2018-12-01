@@ -27,7 +27,7 @@ It converts this language into golang, a language written by [Google's Golang](h
 
 ![boxplot]()
 
-This was generated with 3,500 iterations of transpiling the data from the original format to GoLang.  Each iteration spaced by 100 millisecond delay.  The plot does not include file read time, and binary compilation using the GoLang Compiler.  The box plot is only a measurement of tanspile time in microseconds.
+This was generated with 3,500 iterations of transpiling the data from the original format to GoLang.  Each iteration spaced by 100 millisecond delay.  The plot does not include file read time, and binary compilation using the GoLang Compiler.  The box plot is only a measurement of transpile time in microseconds.
 
 
 ## Tree of the Files:
