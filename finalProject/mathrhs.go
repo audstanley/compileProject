@@ -59,7 +59,6 @@ func reject(i int, dat []byte) {
 	fmt.Println()
 	fmt.Println(cRed, "-----------------------------------------------------", cDefault)
 	fmt.Println()
-	//os.Exit(1)
 }
 
 func mathrhs(expression string) int {
@@ -76,23 +75,12 @@ func mathrhs(expression string) int {
 	stackOfBytes := stack.New()
 	stackString := ""
 	finalLocation := 0
-	tabs := "\t\t\t"
 	dat := []byte(expression)
-
-	fmt.Println("\nChecking the word: ", cGreen, string(dat), cDefault, "\n\n")
 	stackOfBytes.Push(59) // push ;
 	stackOfBytes.Push(5)  // push S
 	stackString += ";"
 	stackString += "S"
 	for i, k := range dat {
-		if len(stackString) > 3 {
-			tabs = "\t\t"
-		} else {
-			tabs = "\t\t\t"
-		}
-		fmt.Print("StackString:", stackString)
-		fmt.Print(tabs, "LastStateN:", stateNum)
-		fmt.Println("\t\tk:", string(k))
 		finalLocation = i
 		if stackOfBytes.Len() != 0 {
 			stateNum = stackOfBytes.Pop().(int)
@@ -100,9 +88,6 @@ func mathrhs(expression string) int {
 			goto switchPlace
 		}
 		goto done
-
-	skipIteration:
-		fmt.Println("    No Match Yet\t\t\t\t\tk:", string(k), "\t\t StateNum: ", stateNumToString(stateNum), "\tStack: ", stackString) // so we don't proceed to the next rune in the buffer
 
 	switchPlace:
 		switch stateNum {
@@ -112,131 +97,111 @@ func mathrhs(expression string) int {
 				reject(i, dat)
 				return i
 			}
-			goto skipIteration
+			goto switchPlace
 		case 1: // State Q
 			stateNum = matrix[1][getColumn(asciiCode(k))]
 			if stateNum == -1 {
 				reject(i, dat)
 				return i
 			}
-			goto skipIteration
+			goto switchPlace
 		case 2: // State T
 			stateNum = matrix[2][getColumn(asciiCode(k))]
 			if stateNum == -1 {
 				reject(i, dat)
 				return i
 			}
-			goto skipIteration
+			goto switchPlace
 		case 3: // State R
-			fmt.Println("    No Match Yet\t\t\t\t\tk:", string(k), "\t\t StateNum: ", stateNumToString(stateNum), "\tStack: ", stackString)
 			stateNum = matrix[3][getColumn(asciiCode(k))]
 			if stateNum == -1 {
 				reject(i, dat)
 				return i
 			}
-			goto skipIteration
+			goto switchPlace
 		case 4: // State F
-			fmt.Println("    No Match Yet\t\t\t\t\tk:", string(k), "\t\t StateNum: ", stateNumToString(stateNum), "\tStack: ", stackString)
 			stateNum = matrix[4][getColumn(asciiCode(k))]
 			if stateNum == -1 {
 				reject(i, dat)
 				return i
 			}
-			goto skipIteration
+			goto switchPlace
 		case 5: // State S
-			fmt.Println("    No Match Yet\t\t\t\t\tk:", string(k), "\t\t StateNum: ", stateNumToString(stateNum), "\tStack: ", stackString)
 			stateNum = matrix[5][getColumn(asciiCode(k))]
 			if stateNum == -1 {
 				reject(i, dat)
 				return i
 			}
-			goto skipIteration
+			goto switchPlace
 		case 'a': // StateNumber: 97
 			if k != 97 {
 				reject(i, dat)
 				return i
 			}
-			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case 'b': // StateNumber: 98
 			if k != 98 {
 				reject(i, dat)
 				return i
 			}
-			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case '+': // StateNumber: 43
 			if k != 43 {
 				reject(i, dat)
 				return i
 			}
-			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case '-': // StateNumber: 45
 			if k != 45 {
 				return i
 			}
-			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case '*': // StateNumber: 42
 			if k != 42 {
 				reject(i, dat)
 				return i
 			}
-			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case '/': // StateNumber: 47
 			if k != 47 {
 				reject(i, dat)
 				return i
 			}
-			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case '(': // StateNumber: 40
 			if k != 40 {
 				reject(i, dat)
 				return i
 			}
-			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case ')': // StateNumber: 41
 			if k != 41 {
 				reject(i, dat)
 				return i
 			}
-			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case '=': // StateNumber: 61
 			if k != 61 {
 				reject(i, dat)
 				return i
 			}
-			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case ';': // StateNumber: 59 (lambda)
 			if k != 59 && stackOfBytes.Len() != 0 {
 				stateNum = stackOfBytes.Pop().(int)
 				stackString = stackString[0 : len(stackString)-1]
-				goto skipIteration
+				goto switchPlace
 			} else {
-
 				if stateNum == ';' && i == len(dat)-1 && stackOfBytes.Len() == 0 {
-					fmt.Println(cGreen, "\t\tWORD ACCEPTED", cDefault)
 					goto done
 				} else if stackOfBytes.Len() == 0 && k != 59 {
 					reject(i, dat)
 					return i
-
 				} else {
-					//fmt.Println("\t\tNO MATCH    k:", string(k), "stateNum: ", stateNum)
 					stateNum = stackOfBytes.Pop().(int)
 					stackString = stackString[0 : len(stackString)-1]
-					fmt.Println("\t\tNO MATCH    k:", string(k), "stateNum: ", stateNum)
-
-					goto skipIteration
+					goto switchPlace
 				}
 			}
-			fmt.Println(cGreen, "\t\tMATCH:", string(k), " ✓ ", cDefault)
 		case 10: //  TQ
 			stackOfBytes.Push(1) // push Q
 			stackOfBytes.Push(2) // push T
 			stackString += "Q"
 			stackString += "T"
-			fmt.Println("    No Match Yet\t\t\t\t\tk:", string(k), "\t\t StateNum: ", stateNumToString(stateNum), "\tStack: ", stackString)
 			stateNum = stackOfBytes.Pop().(int)
 			stackString = stackString[0 : len(stackString)-1]
-			goto skipIteration
+			goto switchPlace
 		case 11: // +TQ
 			stackOfBytes.Push(1)  // push Q
 			stackOfBytes.Push(2)  // push T
@@ -244,10 +209,9 @@ func mathrhs(expression string) int {
 			stackString += "Q"
 			stackString += "T"
 			stackString += "+"
-			fmt.Println("    No Match Yet\t\t\t\t\tk:", string(k), "\t\t StateNum: ", stateNumToString(stateNum), "\tStack: ", stackString)
 			stateNum = stackOfBytes.Pop().(int)
 			stackString = stackString[0 : len(stackString)-1]
-			goto skipIteration
+			goto switchPlace
 		case 12: // -TQ
 			stackOfBytes.Push(1)  // push Q
 			stackOfBytes.Push(2)  // push T
@@ -255,19 +219,17 @@ func mathrhs(expression string) int {
 			stackString += "Q"
 			stackString += "T"
 			stackString += "-"
-			fmt.Println("    No Match Yet\t\t\t\t\tk:", string(k), "\t\t StateNum: ", stateNumToString(stateNum), "\tStack: ", stackString)
 			stateNum = stackOfBytes.Pop().(int)
 			stackString = stackString[0 : len(stackString)-1]
-			goto skipIteration
+			goto switchPlace
 		case 13: //  FR
 			stackOfBytes.Push(3) // push R
 			stackOfBytes.Push(4) // push F
 			stackString += "R"
 			stackString += "F"
-			fmt.Println("    No Match Yet\t\t\t\t\tk:", string(k), "\t\t StateNum: ", stateNumToString(stateNum), "\tStack: ", stackString)
 			stateNum = stackOfBytes.Pop().(int)
 			stackString = stackString[0 : len(stackString)-1]
-			goto skipIteration
+			goto switchPlace
 		case 14: // *FR
 			stackOfBytes.Push(3)  // push R
 			stackOfBytes.Push(4)  // push F
@@ -275,10 +237,9 @@ func mathrhs(expression string) int {
 			stackString += "R"
 			stackString += "F"
 			stackString += "*"
-			fmt.Println("    No Match Yet\t\t\t\t\tk:", string(k), "\t\t StateNum: ", stateNumToString(stateNum), "\tStack: ", stackString)
 			stateNum = stackOfBytes.Pop().(int)
 			stackString = stackString[0 : len(stackString)-1]
-			goto skipIteration
+			goto switchPlace
 		case 15: // /FR
 			stackOfBytes.Push(3)  // push R
 			stackOfBytes.Push(4)  // push F
@@ -286,10 +247,9 @@ func mathrhs(expression string) int {
 			stackString += "R"
 			stackString += "F"
 			stackString += "/"
-			fmt.Println("    No Match Yet\t\t\t\t\tk:", string(k), "\t\t StateNum: ", stateNum, "\tStack: ", stackString)
 			stateNum = stackOfBytes.Pop().(int)
 			stackString = stackString[0 : len(stackString)-1]
-			goto skipIteration
+			goto switchPlace
 		case 16: // (E)
 			stackOfBytes.Push(41) // push )
 			stackOfBytes.Push(0)  // push E
@@ -297,10 +257,9 @@ func mathrhs(expression string) int {
 			stackString += ")"
 			stackString += "E"
 			stackString += "("
-			fmt.Println("    No Match Yet\t\t\t\t\tk:", string(k), "\t\t StateNum: ", stateNumToString(stateNum), "\tStack: ", stackString)
 			stateNum = stackOfBytes.Pop().(int)
 			stackString = stackString[0 : len(stackString)-1]
-			goto skipIteration
+			goto switchPlace
 		case 17: // a=U
 			stackOfBytes.Push(0)  // push E
 			stackOfBytes.Push(61) // push =
@@ -308,21 +267,16 @@ func mathrhs(expression string) int {
 			stackString += "E"
 			stackString += "="
 			stackString += "a"
-
-			fmt.Println("    No Match Yet\t\t\t\t\tk:", string(k), "\t\t StateNum: ", stateNum, "\tStack: ", stackString)
 			stateNum = stackOfBytes.Pop().(int)
 			stackString = stackString[0 : len(stackString)-1]
-			goto skipIteration
-
+			goto switchPlace
 		}
 	}
 
 done:
 	if stackOfBytes.Len() == 0 {
-		fmt.Println(cGreen, "This was a valid Expression", cDefault)
 		return -1
 	} else {
-		//fmt.Println(cRed, "NOT A VALID EXPRESSION", cDefault)
 		reject(finalLocation, dat)
 		return finalLocation
 	}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"regexp"
 	"sort"
 	"strings"
@@ -40,8 +39,8 @@ func mightBeTheWordShow(s string) bool {
 // int => errorCode { 0: no error, 1: error }, int => lineNumber, int => start of error, int => end of error,
 // string => error statement
 func checkFormat(lines map[int][]string) (int, int, int, int, string) {
-	fmt.Println("CHECKING FORMAT")
 	//check for program declaration
+	// <prog> -> program <id> ;
 	if len(lines) >= 1 {
 
 		if len(lines[1]) > 0 && lines[1][0] != "program" {
@@ -59,6 +58,7 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 	}
 
 	// check for var declaration
+	// <prog> -> ... var <dec-list> ...
 	if len(lines) >= 2 {
 		if len(lines[2]) > 0 {
 			if lines[2][0] != "var" {
@@ -68,6 +68,7 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 	}
 
 	// run through each variable declaration, and
+	// <dec-list> -> <dec> : <type> ;
 	if len(lines) >= 3 {
 		for i, word := range lines[3] {
 			if i%2 == 0 { //
@@ -79,7 +80,7 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 				} else if i == len(lines[3])-2 && !mightBeTheWordInteger(word) && word != "integer" {
 					return 1, 3, i, i + 1, " Must declare integer type, might be a misspelling"
 				} else if i == len(lines[3])-2 && mightBeTheWordInteger(word) && word != "integer" {
-					return 1, 3, i, i + 1, " the word integer is mispelled"
+					return 1, 3, i, i + 1, " the word integer is misspelled"
 				} else if i == len(lines[3])-2 && word == "integer" {
 					continue
 				} else {
@@ -99,12 +100,14 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 		}
 	}
 
-	fmt.Println(cGreen, "ourVariables: ", ourVariables, cDefault)
+	// <prog> -> ... begin <stat-list> end
 	if len(lines) >= 4 && lines[4][0] != "begin" {
 		return 1, 4, 0, 1, " You need to have a begin statement before defining variables"
 	}
 
-	// populate the body of the code to be checked for mathematical expressions, or for functions (such as the show func):
+	// populate the body of the code to be checked for mathematical expressions,
+	// or for functions (such as the show func):
+	// <stat-list> -> <stat> | <stat-list>  => the body map list(int {line integers} -> []string{ words })
 	body := make(map[int][]string) // we are going to populate just the body of the data (between begin and end)
 	var beginPosition, endPosition = 0, len(lines)
 	for lNum, lArr := range lines {
@@ -124,15 +127,12 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 		return 1, len(lines), 0, 0, " You are missing a begin statement in your document"
 	} else if lines[len(lines)][0] != "end" {
 		return 1, len(lines), 0, 0, " You are missing an end statement at the end of your document"
-	}
+	} // populated the map list based on positions of begin line, and end line
 	for i, k := range lines {
 		if i < endPosition && i > beginPosition {
 			body[i] = k
 		}
 	}
-	fmt.Print(cGreen, "THE BEGINPOSITION IS: ", beginPosition, cDefault)
-	fmt.Println("THE BODY OF THE SHIT IS: ", body)
-
 	// populate the main.go file, and verify the body of the function below
 	var keys []int
 	for k := range lines {
@@ -155,30 +155,29 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 	ourOutput[2] += string(variableDeclaration)
 	ourOutput[3] = "func main() {"
 	ourOutput[len(ourOutput)-1] = "}"
-	// You're gonna pass in the map of string arrays
 	// We're gonna parse the map of string arrays (slice) to see if it is a validated string format
 	// If it is validated, then turn the mapped string into an expression
 	// Move to next line
 
 	// check for end declaration
 	var lengthLines = len(lines)
-	if lines[lengthLines][0] != "end" {
-		return 1, lengthLines, 0, len(lines[lengthLines][0]) - 1, " No End Declaration"
+	if lines[lengthLines][0] != "end" && len(lines[lengthLines]) == 1 { //last line of the file
+		return 1, lengthLines, 0, len(lines[lengthLines][0]) - 1, " End Declaration Error"
 	}
 
 	//Validating left-hand variables of the body map
+	// <stat> -> <write> | <assign>
 	for lineNum, lineArr := range body {
 		if lineNum > beginPosition && lineNum < endPosition {
 			var valVar string
 			valVar = body[lineNum][0]
-			if valVar != "show" && len(lineArr) >= 4 { //Every string that is not "show" will be checked if it has the right format
+			if valVar != "show" && len(lineArr) >= 4 {
+				// will be checked if it has the right format
 				if mightBeTheWordShow(valVar) {
 					return 1, lineNum, 0, 1, "Incorrect spelling of the word 'show'"
 				}
-				if validVariable(valVar) {
-					fmt.Println("VALIDATE A MATH EXPRESSION")
+				if validVariable(valVar) { // <assign> -> <id> = <expr> ;
 					if body[lineNum][1] == "=" {
-						// Here is where we will parse through the (call the function Alex was working on)
 						eCode, eStr := validateDefinition(body[lineNum]) // function defined in validateDefinition.go
 						if eCode != -1 {                                 // check if there is NO error from mathrhs
 							return 1, lineNum, eCode, eCode + 1, eStr
@@ -186,7 +185,6 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 							// the expression is goodbeginPosition
 							linePopulated := []byte("\t")
 							for i, k := range lineArr {
-								fmt.Println(cYellow, lineArr, cBlue, " : ", i)
 								if i != len(lineArr)-1 {
 									linePopulated = append(linePopulated, []byte(k+" ")...)
 								}
@@ -201,9 +199,8 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 						return 1, lineNum, 0, 0, " Invalid expression"
 					}
 				}
-			} else if valVar == "show" {
+			} else if valVar == "show" { // <write> -> show( <id> ) ;
 				showArr := showTest(strings.Join(body[lineNum], " "))
-				fmt.Println(cGreen, showArr, cDefault)
 				if len(showArr) == 3 {
 					// for loop to check the var
 					if !variableHasBeenDeclared(showArr[1]) {
@@ -218,7 +215,6 @@ func checkFormat(lines map[int][]string) (int, int, int, int, string) {
 					}
 
 				} else {
-					fmt.Println(body[lineNum])
 					return 1, lineNum, 0, 0, " The show function is improperly formatted"
 				}
 			} else {
