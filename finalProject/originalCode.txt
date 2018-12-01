@@ -1,0 +1,24 @@
+program a2018 ;
+	/* This comment
+		is stupid */
+var
+	// declare variables
+qwe , ab1 , cd , e33a , d18 : integer ;
+begin
+	ab1        = 3 ; // initialize variables
+	cd =      4 ;
+	 e33a      = 5    ;
+show ( ab1    ) ; // display ab1
+
+// wdoiwdaoiwdaoidwaio
+/*wdoi a wdiowd iowdaoi */
+
+
+	qwe = 1 * -8 ;
+	/*
+	 blah blah
+	*/
+
+	d18 = ab1 *    ( cd + 2 *       e33a )     ;
+	show (        d18   );
+end

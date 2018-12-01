@@ -168,3 +168,7 @@ func runWithASingleStringNoSpaces() {
 	println()
 
 }
+
+func shree() {
+	fmt.Printf("fucking shree")
+}
