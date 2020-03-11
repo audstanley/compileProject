@@ -25,7 +25,7 @@ program a2018 ;
 It converts this language into golang, a language written by [Google's Golang](https://golang.org/) and uses a sub processed shell script in order to compile the language into multiple binaries.  Currently, this must be run on a Linux computer.
 
 
-![boxplot]()
+![boxplot](https://github.com/audstanley/compileProject/blob/master/finalProject/CompileTimeBoxPlot.png)
 
 This was generated with 3,500 iterations of transpiling the data from the original format to GoLang.  Each iteration spaced by 100 millisecond delay.  The plot does not include file read time, and binary compilation using the GoLang Compiler.  The box plot is only a measurement of transpile time in microseconds.
 
